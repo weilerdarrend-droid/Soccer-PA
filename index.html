@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#07111f">
+
+  <title>Soccer PA Goal Minute</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background: #07111f;
+      color: white;
+      min-height: 100vh;
+      padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+    }
+
+    .app {
+      width: 100%;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 24px 0 40px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .soccer {
+      font-size: 42px;
+      margin-bottom: 4px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.1;
+    }
+
+    .subtitle {
+      color: #9eafc4;
+      margin-top: 8px;
+      font-size: 15px;
+    }
+
+    .card {
+      background: #101d2e;
+      border: 1px solid #26384d;
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .label {
+      color: #9eafc4;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .half-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    button {
+      border: 1px solid #32465d;
+      border-radius: 14px;
+      min-height: 62px;
+      background: #17283b;
+      color: white;
+      font-size: 19px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    button.active {
+      background: #1677ff;
+      border-color: #4c98ff;
+    }
+
+    button:active {
+      transform: scale(.98);
+    }
+
+    .time-input {
+      width: 100%;
+      border: 2px solid #32465d;
+      border-radius: 15px;
+      background: #07111f;
+      color: white;
+      padding: 16px;
+      font-size: 42px;
+      font-weight: 900;
+      text-align: center;
+      letter-spacing: 3px;
+      outline: none;
+    }
+
+    .time-input:focus {
+      border-color: #1677ff;
+    }
+
+    .example {
+      text-align: center;
+      color: #8395aa;
+      font-size: 13px;
+      margin-top: 9px;
+    }
+
+    .result {
+      text-align: center;
+      padding: 25px 12px;
+    }
+
+    .result-label {
+      color: #9eafc4;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+    }
+
+    .minute {
+      font-size: clamp(58px, 16vw, 92px);
+      font-weight: 950;
+      line-height: 1;
+      margin: 10px 0;
+    }
+
+    .minute-word {
+      font-size: 23px;
+      font-weight: 800;
+    }
+
+    .announce {
+      background: #07111f;
+      border-radius: 14px;
+      padding: 17px;
+      margin-top: 20px;
+      font-size: 19px;
+      line-height: 1.45;
+      min-height: 62px;
+    }
+
+    .clear {
+      width: 100%;
+      background: #17283b;
+      margin-top: 2px;
+    }
+
+    .error {
+      color: #ff9b9b;
+      text-align: center;
+      min-height: 20px;
+      margin-top: 9px;
+      font-size: 14px;
+    }
+
+    .footer {
+      text-align: center;
+      color: #71849a;
+      font-size: 12px;
+      margin-top: 18px;
+      line-height: 1.5;
+    }
+
+    @media (min-width: 700px) {
+      .app {
+        padding-top: 40px;
+      }
+
+      h1 {
+        font-size: 36px;
+      }
+
+      button {
+        min-height: 72px;
+        font-size: 22px;
+      }
+
+      .time-input {
+        font-size: 54px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <div class="header">
+    <div class="soccer">⚽</div>
+    <h1>Soccer PA</h1>
+    <div class="subtitle">High School Goal Minute Calculator</div>
+  </div>
+
+  <div class="card">
+    <div class="label">Select Half</div>
+
+    <div class="half-buttons">
+      <button id="firstHalf" class="active">1ST HALF</button>
+      <button id="secondHalf">2ND HALF</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label">Scoreboard Time Remaining</div>
+
+    <input
+      id="time"
+      class="time-input"
+      type="text"
+      inputmode="numeric"
+      autocomplete="off"
+      placeholder="06:00"
+      maxlength="5"
+    >
+
+    <div class="example">
+      Enter the countdown time shown on the scoreboard
+    </div>
+
+    <div id="error" class="error"></div>
+  </div>
+
+  <div class="card result">
+
+    <div class="result-label">Announce Goal In The</div>
+
+    <div id="minute" class="minute">—</div>
+
+    <div id="minuteWord" class="minute-word">MINUTE</div>
+
+    <div id="announce" class="announce">
+      Enter the scoreboard time above.
+    </div>
+
+  </div>
+
+  <button id="clear" class="clear">CLEAR FOR NEXT GOAL</button>
+
+  <div class="footer">
+    Two 40-minute high school soccer halves<br>
+    Second-half match time continues from minute 41 through 80.
+  </div>
+
+</div>
+
+<script>
+
+let half = 1;
+
+const firstHalf = document.getElementById("firstHalf");
+const secondHalf = document.getElementById("secondHalf");
+const timeInput = document.getElementById("time");
+const minuteDisplay = document.getElementById("minute");
+const announceDisplay = document.getElementById("announce");
+const errorDisplay = document.getElementById("error");
+const clearButton = document.getElementById("clear");
+
+function ordinal(number) {
+
+  const lastTwo = number % 100;
+
+  if (lastTwo >= 11 && lastTwo <= 13) {
+    return number + "th";
+  }
+
+  switch (number % 10) {
+    case 1: return number + "st";
+    case 2: return number + "nd";
+    case 3: return number + "rd";
+    default: return number + "th";
+  }
+}
+
+function selectHalf(selectedHalf) {
+
+  half = selectedHalf;
+
+  firstHalf.classList.toggle("active", half === 1);
+  secondHalf.classList.toggle("active", half === 2);
+
+  calculate();
+}
+
+function calculate() {
+
+  const value = timeInput.value.trim();
+
+  errorDisplay.textContent = "";
+
+  if (!value) {
+    minuteDisplay.textContent = "—";
+    announceDisplay.textContent =
+      "Enter the scoreboard time above.";
+    return;
+  }
+
+  const match = value.match(/^(\d{1,2})(?::(\d{1,2}))?$/);
+
+  if (!match) {
+    showError();
+    return;
+  }
+
+  const minutesRemaining = Number(match[1]);
+  const secondsRemaining =
+    match[2] === undefined ? 0 : Number(match[2]);
+
+  if (
+    minutesRemaining > 40 ||
+    secondsRemaining > 59 ||
+    (minutesRemaining === 40 && secondsRemaining !== 0)
+  ) {
+    showError();
+    return;
+  }
+
+  const remainingSeconds =
+    minutesRemaining * 60 + secondsRemaining;
+
+  const elapsedSeconds =
+    2400 - remainingSeconds;
+
+  /*
+    Soccer convention:
+    0:01 through 1:00 elapsed = 1st minute
+    1:01 through 2:00 elapsed = 2nd minute
+    etc.
+  */
+
+  let minuteWithinHalf;
+
+  if (elapsedSeconds <= 60) {
+    minuteWithinHalf = 1;
+  } else {
+    minuteWithinHalf =
+      Math.ceil(elapsedSeconds / 60);
+  }
+
+  let matchMinute;
+
+  if (half === 1) {
+    matchMinute = minuteWithinHalf;
+    matchMinute = Math.min(matchMinute, 40);
+  } else {
+    matchMinute = 40 + minuteWithinHalf;
+    matchMinute = Math.min(matchMinute, 80);
+  }
+
+  const displayMinute = ordinal(matchMinute);
+
+  minuteDisplay.textContent = displayMinute;
+
+  announceDisplay.textContent =
+    "Scoring in the " +
+    displayMinute +
+    " minute…";
+}
+
+function showError() {
+
+  minuteDisplay.textContent = "—";
+
+  announceDisplay.textContent =
+    "Check the scoreboard time.";
+
+  errorDisplay.textContent =
+    "Enter a time between 40:00 and 0:00.";
+}
+
+firstHalf.addEventListener("click", function() {
+  selectHalf(1);
+});
+
+secondHalf.addEventListener("click", function() {
+  selectHalf(2);
+});
+
+timeInput.addEventListener("input", calculate);
+
+clearButton.addEventListener("click", function() {
+
+  timeInput.value = "";
+
+  minuteDisplay.textContent = "—";
+
+  announceDisplay.textContent =
+    "Enter the scoreboard time above.";
+
+  errorDisplay.textContent = "";
+
+  timeInput.focus();
+});
+
+</script>
+
+</body>
+</html>
